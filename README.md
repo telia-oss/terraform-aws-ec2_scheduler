@@ -36,7 +36,7 @@ module "start-stop-ec2" {
 
 | Name         | Description                                                                               | Type          | Default              | Required |
 |--------------|-------------------------------------------------------------------------------------------|---------------|----------------------|----------|
-| `region_list`| List of AWS regions to target for scheduling.                                             | `list(string)`| `[]`                 | No       |
+| `region_list`| List of AWS regions to target for scheduling.                                             | `list(string)`| `["eu-north-1", "eu-west-1", "eu-central-1", "us-west-1"]`                 | No       |
 | `time_zone`  | Time zone used for evaluating `start_at`/`stop_at` tags. Should match [pytz](https://gist.github.com/heyalexej/8bf688fd67d7199be4a1682b3eec7568) names. | `string`      | `"Europe/Stockholm"` | No       |
 
 ## Example EC2 Tagging
