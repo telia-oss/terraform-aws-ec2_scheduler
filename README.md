@@ -1,39 +1,59 @@
-# terraform-ec2-scheduler
+# EC2 Scheduler Terraform Module
 
-This Terraform module sets up automation to **start and stop EC2 instances** based on a schedule. It uses AWS Lambda and EventBridge to manage EC2 instances across **specified AWS regions**.
+This Terraform module automates the scheduling of AWS EC2 instances by starting and stopping them based on user-defined tags. It utilizes Amazon EventBridge to trigger actions hourly, optimizing resource usage and reducing costs.
 
----
+## Features
 
-## 🔧 Features
+- ⏰ Automatically starts/stops EC2 instances based on `start_at` and `stop_at` tags.
+- 🌍 Supports multiple AWS regions via `region_list`.
+- 🕒 Optional support for time zone adjustment using the `time_zone` variable (based on [pytz time zones](https://gist.github.com/heyalexej/8bf688fd67d7199be4a1682b3eec7568)).
+- 🔁 EventBridge rule triggers every hour to evaluate and apply schedule logic.
+- 🔒 Built-in validation for allowed time zones.
 
-- ✅ Automatically **starts** or **stops** EC2 instances based on tags
-- ✅ Supports **multiple regions**
-- ✅ Uses **EventBridge** for scheduling
-- ✅ IAM roles and permissions included
+## How It Works
 
----
+1. **Tag EC2 instances** with:
+   - `start_at`: Hour (00–23) when the instance should start
+   - `stop_at`: Hour (00–23) when the instance should stop
 
-## 🚀 Usage
+2. **Deploy the module** in your Terraform configuration to enable the automation.
+
+3. **Every hour**, EventBridge invokes a Lambda function that:
+   - Checks the current hour in the configured time zone.
+   - Starts/stops instances as needed based on their tags.
+
+## Usage
 
 ```hcl
-module "ec2_scheduler" {
-  source        = "git::https://github.com/telia-company/public-cloud-iac-terraform-modules.git//aws/modules/ec2_scheduler"  
-  regions       = ["eu-north-1", "eu-west-1", "eu-central-1", "us-west-1"]
+module "start-stop-ec2" {
+  source      = "../../../../public-cloud-iac-terraform-modules/aws/modules/ec2_scheduler"
+  region_list = ["eu-north-1", "eu-west-1"]
+  time_zone   = "Europe/Stockholm"
 }
 ```
 
-The EC2 Scheduler module allows you to automatically start and stop EC2 instances based on tags you apply to them.
+## Input Variables
 
+| Name         | Description                                                                               | Type          | Default              | Required |
+|--------------|-------------------------------------------------------------------------------------------|---------------|----------------------|----------|
+| `region_list`| List of AWS regions to target for scheduling.                                             | `list(string)`| `[]`                 | No       |
+| `time_zone`  | Time zone used for evaluating `start_at`/`stop_at` tags. Should match [pytz](https://gist.github.com/heyalexej/8bf688fd67d7199be4a1682b3eec7568) names. | `string`      | `"Europe/Stockholm"` | No       |
 
-🏷️ Required EC2 Tags
+## Example EC2 Tagging
 
-**start_at**	- Time to start the EC2 instance (UTC time)
+To schedule an EC2 instance to **start at 8 AM** and **stop at 6 PM**:
 
-**stop_at**	  - Time to stop the EC2 instance (UTC time)
-
-🏷️ Example
-
-```hcl
-start_at = "08:00"
-stop_at  = "18:00"
+```bash
+aws ec2 create-tags \
+  --resources i-0123456789abcdef0 \
+  --tags Key=start_at,Value=8 Key=stop_at,Value=18
 ```
+
+## Outputs
+
+No outputs are currently defined by this module.
+
+## Requirements
+
+- Terraform >= 1.0
+- AWS provider
