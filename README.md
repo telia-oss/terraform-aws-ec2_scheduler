@@ -41,12 +41,12 @@ module "start-stop-ec2" {
 
 ## Example EC2 Tagging
 
-To schedule an EC2 instance to **start at 8 AM** and **stop at 6 PM**:
+To schedule an EC2 instance to **start at 8:00 AM** and **stop at 6:00 PM**:
 
 ```bash
 aws ec2 create-tags \
   --resources i-0123456789abcdef0 \
-  --tags Key=start_at,Value=8 Key=stop_at,Value=18
+  --tags Key=start_at,Value=8:00 Key=stop_at,Value=18:00
 ```
 
 ## Outputs
